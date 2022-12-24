@@ -1,11 +1,63 @@
-import {View,StyleSheet, Pressable,Text, FlatList, Image, TouchableOpacity} from 'react-native';
+import {View,StyleSheet, Pressable,Text, FlatList, Image, TouchableOpacity,Alert} from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react';
 import * as Contacts from 'expo-contacts';
+import { SetDataStorage } from './GetSetData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ContactFile = () =>{
     const [contactList,setContactList]=useState();
     const navigation = useNavigation();
+
+    const SetToData = async(a,b) => {
+        const value =[{
+            name:a,
+            num:b,
+     }];
+        try {
+            const jsonValue = await AsyncStorage.getItem('@costumerList');
+            const data=JSON.parse(jsonValue);
+             if (data!=null) {
+                if (data.includes(value,0)) {console.log("aleart");
+                Alert.alert('This Contact is alredy a Costumer',[
+                    {text:'Cancel',style:'cancel'},{text:'Ok'}
+                ]
+   
+                )
+                } else {console.log('notKnow');
+                const value2 =[...data,{
+                    name:a,
+                    num:b,
+             }];
+             const jsonValue2 = JSON.stringify(value2);
+             await AsyncStorage.setItem('@costumerList',jsonValue2);
+             console.log("AllSetNotNull");
+                }
+            } else {
+                const value3 =[{
+                    name:a,
+                    num:b,
+             }];
+             const jsonValue3 = JSON.stringify(value3);
+             await AsyncStorage.setItem('@costumerList',jsonValue3);
+             console.log("AllSetNull");
+            } 
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    const ContactImage = () => {
+        if (rawData.imageAvailable) { return(
+            <View style={style.imageContainer}>
+               <Image style={style.img} source={{uri:rawData.image.uri}}/>
+           </View>)
+        } else {
+            return(
+            <View style={style.imageContainer}>
+                <Image style={style.img} source={require('../assets/undefiniedContactImage.png')}/>
+            </View>)
+        }
+    };
 
     const GetUserContacts = async () => {
         try {
@@ -16,42 +68,45 @@ const ContactFile = () =>{
                 });
                 const GetContact = (item) => {/* 
                     const obj = {name:item.name,num:item.phoneNumbers[0]}; */
-                    const GetImage = (img) => {
-                        if (img.imageAvailable) {
-                            return img.image.uri;
-                        } else {
-                            return "imgNotAvailible"
-                        }
-                    };
+                    const GetImage = () => {
+                       if (item.imageAvailable) {
+                        return {uri:item.image.uri};
+                       } else {
+                        const k = require('../assets/undefiniedContactImage.png');
+                        return k
+                       }
+                    };console.log(GetImage());
                     if (Array.isArray(item.phoneNumbers)) {
                         const obj = {name:item.name,
                             num:item.phoneNumbers[0].number,
                             key:item.id,
-                            imgUri:'../assets/undefiniedContactImage.png'};
+                            imageUri:GetImage(),
+                        };
                         return obj;
                     }else{}
                  };const dataArray = data.map(GetContact);
                  const fltArray = dataArray.filter((el)=>{return el != null;});
                  setContactList(fltArray);
+                 
             } else {
                 console.log('no permission get');
             }} catch(e){console.log(e);}
     };
     useEffect(()=>{GetUserContacts()},[]);
+
     return(
             <View style={style.container}>
                 
                 <FlatList data={contactList}
                 keyExtractor={(item)=>item.key}
+                maxToRenderPerBatch={10}
                   renderItem={({item})=>{
                     return(
-                        <TouchableOpacity onPress={()=>{
-                            onsole.log(item.name);
-                        }}>
+                        <TouchableOpacity onPress={()=>{SetToData(item.name,item.num);}}>
                         <View style={style.listContainer}>
-                            <View style={style.imageContainer}>
-                                <Image style={style.img} source={require('../assets/undefiniedContactImage.png')}/>
-                            </View>
+                        <View style={style.imageContainer}>
+                <Image style={style.img} source={item.imageUri}/>
+            </View>
                             <View style={style.listContantText}>
                                 <Text style={style.listText}>{item.name}</Text>
                                 <Text style={style.number}>{item.num}</Text>

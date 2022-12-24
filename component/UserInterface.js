@@ -20,7 +20,7 @@ const UI = () =>{
             </View>
             <View style={style.body}>
                
-               {/*  <Costumers/> */}
+               <Costumers/>
                 
                 </View>
                

@@ -1,8 +1,7 @@
 
-import {FlatList, Text,View,StyleSheet,Pressable,ScrollView} from 'react-native';
-import  AsyncStorage  from '@react-native-async-storage/async-storage';
+import {FlatList, Text,View,StyleSheet,Image} from 'react-native';
 import {React,useState,useEffect} from 'react';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
   /* #00134d
@@ -25,48 +24,34 @@ import {React,useState,useEffect} from 'react';
         const [load,setLoad]=useState(false);
        
        
-        const GetData =  async ()=>{
-            try {
-               const jsonValue = await AsyncStorage.getItem('@costumerList');
-               const data=JSON.parse(jsonValue); 
-               setData(...data);
-              /*  console.log(Data); */
-            } catch (e) {
-                console.log(e);
-            }
-        }
-
-        useEffect(()=>{GetData()},[])
+        const GetDataStorageMn = async() => {
+          try {
+                 const jsonValue = await AsyncStorage.removeItem('@costumerList')
+                /*  const data=JSON.parse(jsonValue);
+                 setData(data);  */}catch(e){
+                  console.log(e);
+              }
+          
+   };
+          useEffect(()=>{GetDataStorageMn();})
         
         const showData = ({item})=>{
           
             return(
-                
-                <View style={style.container}>
-                    <View >
-                    <Text style={style.text}>{item.Name}</Text>
-                    <Text style={style.number}>{item.Number}</Text>
-                    </View>
-                   
-                    <Text style={style.getAmount}>{item.Amount}</Text>
-                    
-                </View>
+              <View style={style.listContainer}>
+              <View style={style.imageContainer}>
+                  <Image style={style.img} source={require('../assets/undefiniedContactImage.png')}/>
+              </View>
+              <View style={style.listContantText}>
+                  <Text style={style.listText}>{item.name}</Text>
+                  <Text style={style.number}>{item.num}</Text>
+              </View>
+          </View>
             )
         }
         return(<View >
-            <Pressable style={{
-                    height:50,
-                    width:55,
-                    backgroundColor:'#fff',
-                    left:300,
-                    borderRadius:50,
-                    alignItems:'center',
-                    justifyContent:'center',
-                }} onPress={()=>{setLoad(!load);}}>
-                    <Text>Press</Text>
-                    </Pressable>
             <FlatList data={Data} 
-            keyExtractor={(item)=>item.Number}
+            keyExtractor={(item)=>item.num}
             renderItem={showData}
             extraData={load}
     /></View>  )
@@ -77,35 +62,49 @@ import {React,useState,useEffect} from 'react';
 
 
     const style = StyleSheet.create({
-        container:{
-            height:75,
-            width:340,
-            margin:10,
-            display:'flex',
-            flexDirection:'row',
-              borderRadius:25,
-            justifyContent:'space-between',
-            backgroundColor:'#fff',
-            alignItems:'center',
-          
-        },
+      listContainer:{
+        height:75,
+        width:340,
+        margin:10,
+          borderRadius:25,
+        backgroundColor:'#fff',
+        display:'flex',
+        flexDirection:'row',
+    },
+    imageContainer:{
+        height:75,
+        width:70,
+        justifyContent:'center',
+        alignItems:'center',
+        borderBottomStartRadius:25,
+        borderTopStartRadius:25,
+        marginLeft:10,
+    },
+    img:{
+        height:60,
+        width:60,
+        borderRadius:30,
+
+    },
+    listContant:{
+        height:75,
+        width:280,
+        borderBottomEndRadius:25,
+        borderTopEndRadius:25,
+    },
         
-        text:{
-            marginLeft:20,
-             fontSize:18,
-              fontWeight:'bold',
-             textAlign:'center',
-      },
-      getAmount:{
-        color:'#ff0000',
-        fontSize:18,
-         fontWeight:'bold',
-         marginRight:15,
-      },
-      number:{
-        marginLeft:30,
-        color:'#666666',
-      }
+    listText:{
+      marginLeft:10,
+     fontSize:18,
+      fontWeight:'bold',
+ },
+ number:{
+  marginLeft:20,
+  color:'#666666',
+  },
+  listContantText:{
+     justifyContent:'center',
+  }
     })
 
     export  default Costumers;
